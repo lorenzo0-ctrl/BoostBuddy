@@ -9,26 +9,44 @@ class BalancedLifeCrew:
 
     agents: List[BaseAgent]
     tasks: List[Task]
-
-    # leggi da agents.yaml
+    
+    def __init__(self, agents: List[BaseAgent], tasks: List[Task]):
+        self.agents = agents
+        self.tasks = tasks
+        self.agents_config = {
+            'orchestrator': 'student_clash/agents/orchestrator.yaml',
+            'trainer': 'student_clash/agents/trainer.yaml',
+            'nutritionist': 'student_clash/agents/nutritionist.yaml',
+        }
+    # Learn more about YAML configuration files here:
+    # Agents: https://docs.crewai.com/concepts/agents#yaml-configuration-recommended
+    # Tasks: https://docs.crewai.com/concepts/tasks#yaml-configuration-recommended
+    
+    # If you would like to add tools to your agents, you can learn more about it here:
+    # https://docs.crewai.com/concepts/agents#agent-tools
     @agent
-    def trainer_agent(self) -> Agent:
+    def orchestrator(self) -> Agent:
         return Agent(
-            config=self.agents_config['trainer_agent'], 
+            config=self.agents_config['orchestrator'], 
+            allow_delegation=True,
+            memory=True,
+            verbose=True
+        )
+    @agent
+    def trainer(self) -> Agent:
+        return Agent(
+            config=self.agents_config['trainer'], 
+            tools=[self.trainer_tool],
+            memoryv=True,
             verbose=True
         )
 
     @agent
-    def nutritionist_agent(self) -> Agent:
+    def nutritionist(self) -> Agent:
         return Agent(
-            config=self.agents_config['nutritionist_agent'],
-            verbose=True
-        )
-
-    @agent
-    def stress_agent(self) -> Agent:
-        return Agent(
-            config=self.agents_config['stress_agent'],
+            config=self.agents_config['nutritionist'], 
+            tools=[self.nutritionist_tool],
+            memory=True,
             verbose=True
         )
 
