@@ -14,7 +14,7 @@ load_dotenv()
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 REQUIRED_FIELDS = ["fitness_level", "diet_pref", "stress_level", "time_available"]
-
+## prova
 
 def extract_inputs(user_message: str):
     prompt = f"""
