@@ -6,8 +6,8 @@ from datetime import datetime
 from dotenv import load_dotenv
 import os
 from openai import OpenAI
-from my_project.crew import BalancedLifeCrew
-from my_project.memory import MemoryManager  # il file memory.py con MemoryManager
+from crew import BalancedLifeCrew
+from .tools.memory_manager import MemoryManager  # il file memory.py con MemoryManager
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 load_dotenv()

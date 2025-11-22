@@ -3,7 +3,8 @@ from crewai.project import CrewBase, agent, crew, task
 from crewai.agents.agent_builder.base_agent import BaseAgent
 from typing import List
 from .tools.memory_manager import MemoryManager
-
+from .tools.custom_tool import search_food_facts
+from crewai import FileSearchTool
 @CrewBase
 class BalancedLifeCrew:
     """BalancedLife crew"""
@@ -20,6 +21,24 @@ class BalancedLifeCrew:
             'nutritionist': 'student_clash/agents/nutritionist.yaml',
         }
         self.memory_manager = MemoryManager()
+        self.training_tool = FileSearchTool(
+            description="Tool for accessing fitness training guidelines and workout plans.",
+            config={
+                "search_tool": {
+                    "dir_path": "knowledge/fitness" # PUNTA ALLA CARTELLA
+                }
+            }
+        )
+        
+        # Tool per il Nutrizionista: accede a tutti i file nella cartella 'nutrition'
+        self.nutrition_tool = FileSearchTool(
+            description="Tool for accessing official nutritional guidelines and food tables.",
+            config={
+                "search_tool": {
+                    "dir_path": "knowledge/nutrition" # PUNTA ALLA CARTELLA
+                }
+            }
+        )
     # Learn more about YAML configuration files here:
     # Agents: https://docs.crewai.com/concepts/agents#yaml-configuration-recommended
     # Tasks: https://docs.crewai.com/concepts/tasks#yaml-configuration-recommended
@@ -51,7 +70,7 @@ class BalancedLifeCrew:
         memory = self.memory_manager.memory
         return Agent(
             config=self.agents_config['nutritionist'], 
-            tools=[self.nutritionist_tool],
+            tools=[self.nutritionist_tool, search_food_facts],
             memory=memory,
             verbose=True
         )
