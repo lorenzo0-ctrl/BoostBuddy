@@ -19,12 +19,15 @@ class BalancedLifeCrew:
             'trainer': 'student_clash/agents/trainer.yaml',
             'nutritionist': 'student_clash/agents/nutritionist.yaml',
         }
+        self.memory_manager = MemoryManager()
     # Learn more about YAML configuration files here:
     # Agents: https://docs.crewai.com/concepts/agents#yaml-configuration-recommended
     # Tasks: https://docs.crewai.com/concepts/tasks#yaml-configuration-recommended
     
     # If you would like to add tools to your agents, you can learn more about it here:
     # https://docs.crewai.com/concepts/agents#agent-tools
+
+
     @agent
     def orchestrator(self) -> Agent:
         return Agent(
@@ -35,19 +38,21 @@ class BalancedLifeCrew:
         )
     @agent
     def trainer(self) -> Agent:
+        memory = self.memory_manager.memory
         return Agent(
             config=self.agents_config['trainer'], 
             tools=[self.trainer_tool],
-            memoryv=True,
+            memory=memory,
             verbose=True
         )
 
     @agent
     def nutritionist(self) -> Agent:
+        memory = self.memory_manager.memory
         return Agent(
             config=self.agents_config['nutritionist'], 
             tools=[self.nutritionist_tool],
-            memory=True,
+            memory=memory,
             verbose=True
         )
 
