@@ -1,94 +1,75 @@
 #!/usr/bin/env python
 import sys
 import warnings
-
+import json
 from datetime import datetime
-
-from student_clash.crew import StudentClash
+from dotenv import load_dotenv
+import os
+from openai import OpenAI
+from my_project.crew import BalancedLifeCrew
+from my_project.memory import MemoryManager  # il file memory.py con MemoryManager
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
+load_dotenv()
 
-# This main file is intended to be a way for you to run your
-# crew locally, so refrain from adding unnecessary logic into this file.
-# Replace with inputs you want to test with, it will automatically
-# interpolate any tasks and agents information
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+REQUIRED_FIELDS = ["fitness_level", "diet_pref", "stress_level", "time_available"]
 
-def run():
+
+def extract_inputs(user_message: str):
+    prompt = f"""
+    Extract the following information from the user's message in JSON format:
+    - fitness_level (beginner/intermediate/advanced)
+    - diet_pref (any dietary preference)
+    - stress_level (low/medium/high)
+    - time_available (minutes)
+    
+    If any field is missing, leave it as null.
+
+    User message: "{user_message}"
+    Return only JSON.
     """
-    Run the crew.
-    """
-    inputs = {
-        'topic': 'AI LLMs',
-        'current_year': str(datetime.now().year)
-    }
-
+    response = client.chat.completions.create(
+        model="gpt-4.1-mini",
+        messages=[{"role": "user", "content": prompt}]
+    )
     try:
-        StudentClash().crew().kickoff(inputs=inputs)
-    except Exception as e:
-        raise Exception(f"An error occurred while running the crew: {e}")
-
-
-def train():
-    """
-    Train the crew for a given number of iterations.
-    """
-    inputs = {
-        "topic": "AI LLMs",
-        'current_year': str(datetime.now().year)
-    }
-    try:
-        StudentClash().crew().train(n_iterations=int(sys.argv[1]), filename=sys.argv[2], inputs=inputs)
-
-    except Exception as e:
-        raise Exception(f"An error occurred while training the crew: {e}")
-
-def replay():
-    """
-    Replay the crew execution from a specific task.
-    """
-    try:
-        StudentClash().crew().replay(task_id=sys.argv[1])
-
-    except Exception as e:
-        raise Exception(f"An error occurred while replaying the crew: {e}")
-
-def test():
-    """
-    Test the crew execution and returns the results.
-    """
-    inputs = {
-        "topic": "AI LLMs",
-        "current_year": str(datetime.now().year)
-    }
-
-    try:
-        StudentClash().crew().test(n_iterations=int(sys.argv[1]), eval_llm=sys.argv[2], inputs=inputs)
-
-    except Exception as e:
-        raise Exception(f"An error occurred while testing the crew: {e}")
-
-def run_with_trigger():
-    """
-    Run the crew with trigger payload.
-    """
-    import json
-
-    if len(sys.argv) < 2:
-        raise Exception("No trigger payload provided. Please provide JSON payload as argument.")
-
-    try:
-        trigger_payload = json.loads(sys.argv[1])
+        data = json.loads(response.choices[0].message["content"])
+        return data
     except json.JSONDecodeError:
-        raise Exception("Invalid JSON payload provided as argument")
+        return None
 
-    inputs = {
-        "crewai_trigger_payload": trigger_payload,
-        "topic": "",
-        "current_year": ""
-    }
 
-    try:
-        result = StudentClash().crew().kickoff(inputs=inputs)
-        return result
-    except Exception as e:
-        raise Exception(f"An error occurred while running the crew with trigger: {e}")
+def main():
+    user_message = input("You: ")
+
+    # Prova a estrarre JSON dai task
+    extracted = extract_inputs(user_message)
+    memory = MemoryManager()
+
+    if extracted and all(field in extracted and extracted[field] is not None for field in REQUIRED_FIELDS):
+        # Aggiorno la memoria con i dati estratti
+        for field in REQUIRED_FIELDS:
+            memory.update(field, extracted[field])
+
+        # Eseguo la crew
+        try:
+            crew_instance = BalancedLifeCrew()
+            plan = crew_instance.crew().kickoff(inputs=memory.memory)  # passo la memoria aggiornata
+            print("\n💡 Generated Daily Plan:\n")
+            for task_name, output in plan.items():
+                print(f"{task_name}: {output}\n")
+            
+            # Aggiorno memoria con output dei task se necessario
+            if 'fitness_task' in plan:
+                memory.update("last_workout", plan['fitness_task'])
+            if 'diet_task' in plan:
+                memory.update("last_meal_plan", plan['diet_task'])
+
+        except Exception as e:
+            print(f"An error occurred while running the crew: {e}")
+    else:
+        print("I'm unable to do this task.")
+
+if __name__ == "__main__":
+    main()
