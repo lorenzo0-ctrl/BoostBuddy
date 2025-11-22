@@ -1,24 +1,23 @@
 fitness_task:
   description: >
-    Crea un piano di allenamento personalizzato per l'utente
-    considerando il livello fitness ({fitness_level}) e il tempo disponibile ({time_available}).
+    Create a personalized workout plan for the user
+    considering their fitness level ({fitness_level}) and available time ({time_available}).
   expected_output: >
-    Un programma di allenamento dettagliato, con durata, intensità e tipo di esercizi.
+    A detailed workout program including duration, intensity, and type of exercises.
   agent: trainer_agent
 
 diet_task:
   description: >
-    Crea un piano pasti equilibrato secondo le preferenze alimentari dell'utente ({diet_pref}).
+    Create a balanced meal plan according to the user's dietary preferences ({diet_pref}).
   expected_output: >
-    Elenco di pasti giornalieri con colazione, pranzo, cena e spuntini
-    includendo alternative flessibili e nutrienti.
+    A daily meal schedule with breakfast, lunch, dinner, and snacks,
+    including flexible and nutritious alternatives.
   agent: nutritionist_agent
 
 stress_task:
   description: >
-    Monitora il livello di stress dell'utente ({stress_level}) e suggerisci modifiche al piano
-    (ridurre intensità, aggiungere momenti di relax, ecc.)
+    Monitor the user's stress level ({stress_level}) and suggest modifications to the plan
+    (reduce workout intensity, add relaxation or mindfulness breaks, etc.).
   expected_output: >
-    Brevi suggerimenti di adattamento al piano di allenamento e alimentazione
-    per ridurre lo stress.
+    Short recommendations to adjust the workout and meal plan to reduce stress.
   agent: stress_agent

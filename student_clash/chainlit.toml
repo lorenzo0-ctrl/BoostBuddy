@@ -1,0 +1,12 @@
+[project]
+name = "My CrewAI Project"
+description = "Frontend Chainlit per CrewAI"
+
+# Se vuoi cambiare la porta
+# port = 8000
+
+# Mostra chainlit.md come welcome screen
+ui = true
+
+# Attiva autoreload
+watch = true

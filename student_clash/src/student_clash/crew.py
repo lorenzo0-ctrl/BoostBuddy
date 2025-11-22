@@ -4,6 +4,7 @@ from crewai.agents.agent_builder.base_agent import BaseAgent
 from typing import List
 from crewai_tools import FileSearchTool
 from src.tools import open_food_facts_tool
+from .tools.memory_manager import MemoryManager
 
 @CrewBase
 class BalancedLifeCrew:
@@ -41,12 +42,15 @@ class BalancedLifeCrew:
                 }
             }
         )
+        self.memory_manager = MemoryManager()
     # Learn more about YAML configuration files here:
     # Agents: https://docs.crewai.com/concepts/agents#yaml-configuration-recommended
     # Tasks: https://docs.crewai.com/concepts/tasks#yaml-configuration-recommended
     
     # If you would like to add tools to your agents, you can learn more about it here:
     # https://docs.crewai.com/concepts/agents#agent-tools
+
+
     @agent
     def orchestrator(self) -> Agent:
         return Agent(
@@ -57,19 +61,23 @@ class BalancedLifeCrew:
         )
     @agent
     def trainer(self) -> Agent:
+        memory = self.memory_manager.memory
         return Agent(
             config=self.agents_config['trainer'], 
             tools=[self.trainer_tool],
-            memoryv=True,
+            memory=memory,
             verbose=True
         )
 
     @agent
     def nutritionist(self) -> Agent:
+        memory = self.memory_manager.memory
         return Agent(
             config=self.agents_config['nutritionist'], 
             tools=[self.nutritionist_tool, open_food_facts_tool],
             memory=True,
+            tools=[self.nutritionist_tool],
+            memory=memory,
             verbose=True
         )
 
@@ -77,21 +85,24 @@ class BalancedLifeCrew:
      # leggi da tasks.yaml
     @task
     def fitness_task(self) -> Task:
-        return Task(
-            config=self.tasks_config['fitness_task'],
-        )
+        task = Task(config=self.tasks_config['fitness_task'])
+        result = task.run(inputs=self.memory_manager.memory)
+        self.memory_manager.update("last_workout", result)
+        return task
 
     @task
     def diet_task(self) -> Task:
-        return Task(
-            config=self.tasks_config['diet_task'],
-        )
+        task = Task(config=self.tasks_config['diet_task'])
+        result = task.run(inputs=self.memory_manager.memory)
+        self.memory_manager.update("last_meal_plan", result)
+        return task
 
     @task
     def stress_task(self) -> Task:
-        return Task(
-            config=self.tasks_config['stress_task'],
-        )
+        task = Task(config=self.tasks_config['stress_task'])
+        result = task.run(inputs=self.memory_manager.memory)
+        self.memory_manager.update("last_stress_level", result)
+        return task
 
     @crew
     def crew(self) -> Crew:
@@ -101,3 +112,7 @@ class BalancedLifeCrew:
             process=Process.sequential,
             verbose=True
         )
+    
+def create_crew():
+    """Helper function to create and return the crew"""
+    return BalancedLifeCrew().crew()
