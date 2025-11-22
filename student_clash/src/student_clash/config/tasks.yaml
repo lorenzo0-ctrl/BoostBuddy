@@ -1,17 +1,24 @@
-research_task:
+fitness_task:
   description: >
-    Conduct a thorough research about {topic}
-    Make sure you find any interesting and relevant information given
-    the current year is {current_year}.
+    Crea un piano di allenamento personalizzato per l'utente
+    considerando il livello fitness ({fitness_level}) e il tempo disponibile ({time_available}).
   expected_output: >
-    A list with 10 bullet points of the most relevant information about {topic}
-  agent: researcher
+    Un programma di allenamento dettagliato, con durata, intensità e tipo di esercizi.
+  agent: trainer_agent
 
-reporting_task:
+diet_task:
   description: >
-    Review the context you got and expand each topic into a full section for a report.
-    Make sure the report is detailed and contains any and all relevant information.
+    Crea un piano pasti equilibrato secondo le preferenze alimentari dell'utente ({diet_pref}).
   expected_output: >
-    A fully fledged report with the main topics, each with a full section of information.
-    Formatted as markdown without '```'
-  agent: reporting_analyst
+    Elenco di pasti giornalieri con colazione, pranzo, cena e spuntini
+    includendo alternative flessibili e nutrienti.
+  agent: nutritionist_agent
+
+stress_task:
+  description: >
+    Monitora il livello di stress dell'utente ({stress_level}) e suggerisci modifiche al piano
+    (ridurre intensità, aggiungere momenti di relax, ecc.)
+  expected_output: >
+    Brevi suggerimenti di adattamento al piano di allenamento e alimentazione
+    per ridurre lo stress.
+  agent: stress_agent
